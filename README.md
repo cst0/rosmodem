@@ -11,7 +11,7 @@ compression and serialization.
 ## How it works/what it does
 
 A typical robot-to-control-station interface might look something like this:
-![Robot to control station architecture.](./standard_approach.png)
+![Robot to control station architecture.](./images/standard_approach.png)
 
 This works in many cases. However, what about when we want to send this communication over an acoustic modem, radio device, or even just a new network inteface? The typical approach is to drop ROS in favor of sending custom commands, and then having a new ROS system on the other end receive and interpret them. While this also works, it has key drawbacks:
 
@@ -23,7 +23,7 @@ Each of these present problems with development, debugging, and deployment.
 A better solution is therefore to have them modem pass-through messages,
 and replicate the topics on each end:
 
-![Robot to control station architecture.](./contributed_approach.png)
+![Robot to control station architecture.](./images/contributed_approach.png)
 
 While we're at it, this is also an opportunity to handle more effective compression, etc.
 
