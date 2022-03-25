@@ -26,10 +26,10 @@ class NetworkModem(Modem):
         else:
             self.socket.connect((remote, port))
 
-    def read(self):
+    def read(self, max_read_len):
         bytestr = b""
         if self.clientmode:
-            bytestr = self.conn.recv(1024)
+            bytestr = self.conn.recv(max_read_len)
         return bytestr
 
     def write(self, b):
@@ -46,7 +46,12 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("port", help="Is this the client?")
-    parser.add_argument("--remote", type=str, default='127.0.0.1', help="Who are we trying to connect to?")
+    parser.add_argument(
+        "--remote",
+        type=str,
+        default="127.0.0.1",
+        help="Who are we trying to connect to?",
+    )
     parser.add_argument("--client", action="store_true", help="Is this the client?")
     parser.add_argument("--server", action="store_true", help="Is this the server?")
 
