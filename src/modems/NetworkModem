@@ -1,3 +1,62 @@
 #!/usr/bin/env python3
 
 import rospy
+import argparse
+import socket
+import sys
+from modem import Modem
+
+
+class NetworkModem(Modem):
+    def initialize(self, args):
+        (remote, port, clientmode) = args
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # there's one server, one client. Here's how we'll tell them apart:
+        self.clientmode = clientmode
+        if not self.clientmode:
+            # cool, we're not the client, we're the server. Someone's gonna try to find us.
+            self.socket.bind(("127.0.0.1", port))
+            self.socket.listen()
+            rospy.loginfo("Waiting for socket connection on " + str(port))
+            self.conn, self.address = self.socket.accept()
+
+            if not self.address.equals(remote):
+                rospy.logwarn("Connection is from an unexpected remote")
+
+        else:
+            self.socket.connect((remote, port))
+
+    def read(self):
+        bytestr = b""
+        if self.clientmode:
+            bytestr = self.conn.recv(1024)
+        return bytestr
+
+    def write(self, b):
+        self.conn.sendall(b)
+
+    def deinitialize(self, args):
+        del args
+        self.conn.close()
+        self.socket.close()
+
+
+def main():
+    rospy.init_node("NetworkModem", anonymous=False)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("port", help="Is this the client?")
+    parser.add_argument("--remote", type=str, default='127.0.0.1', help="Who are we trying to connect to?")
+    parser.add_argument("--client", action="store_true", help="Is this the client?")
+    parser.add_argument("--server", action="store_true", help="Is this the server?")
+
+    args = parser.parse_args(rospy.myargv())
+    if (args.client and args.server) or (not args.client and args.server):
+        rospy.logerr("Specify exactly one of either 'server' or 'client'")
+        sys.exit(1)
+
+    NetworkModem((args.remote, args.port, args.client))
+
+
+if __name__ == "__main__":
+    main()
