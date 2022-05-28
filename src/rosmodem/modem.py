@@ -5,7 +5,6 @@ import re
 import threading
 from genpy.message import get_message_class
 from abc import ABCMeta, abstractmethod
-from typing import Union
 
 
 class InterfaceWrapper:
